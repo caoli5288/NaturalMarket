@@ -1,0 +1,16 @@
+name: NaturalMarket
+version: 0.1.0
+main: com.mengcraft.bukkit.NaturalMarket
+
+commands:
+  market:
+    description: Default command for this plugin.
+    permission: market.use
+    
+permissions:
+  market.use:
+    description: Default permission for this plugin.
+    default: true
+  market.admin:
+    description: Administrator permission for this plugin.
+    default: op
