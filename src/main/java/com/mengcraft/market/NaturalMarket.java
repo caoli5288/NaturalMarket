@@ -22,6 +22,7 @@ public class NaturalMarket extends JavaPlugin {
 			getLogger().warning("Can not link to mcstats.org!");
 		}
 		getCommand("market").setExecutor(new Commands());
+		getServer().getPluginManager().registerEvents(new Events(), this);
 		MarketManager.get().flush();
 	}
 

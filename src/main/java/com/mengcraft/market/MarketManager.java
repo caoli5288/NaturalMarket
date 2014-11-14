@@ -28,7 +28,7 @@ public class MarketManager {
 		return MANAGER;
 	}
 
-	public List<Inventory> getInvs() {
+	public List<Inventory> getPages() {
 		return inventories;
 	}
 
@@ -36,7 +36,7 @@ public class MarketManager {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
 		Iterator<MengRecord> records = table.find().iterator();
 		List<ItemStack> stacks = new ArrayList<ItemStack>();
-		getInvs().clear();
+		getPages().clear();
 		while (records.hasNext()) {
 			ItemStack stack = genItemStack(records.next());
 			if (stacks.size() < 40) {
@@ -50,11 +50,11 @@ public class MarketManager {
 	}
 
 	private void newInv(List<ItemStack> stacks) {
-		Inventory inv = Bukkit.createInventory(null, 54, "NaturalMarket" + ":" + getInvs().size());
+		Inventory inv = Bukkit.createInventory(null, 54, "NaturalMarket" + ":" + getPages().size());
 		inv.setContents(stacks.toArray(new ItemStack[45]));
 		inv.setItem(53, getNextPoint(true));
 		inv.setItem(51, getNextPoint(false));
-		getInvs().add(inv);
+		getPages().add(inv);
 		stacks.clear();
 	}
 

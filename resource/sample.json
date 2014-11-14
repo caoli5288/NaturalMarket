@@ -1,8 +1,0 @@
-{
-	"any_uid":{
-		"id":integer,
-		"price":double,
-		"sales":integer,
-		"items":string
-	}
-}

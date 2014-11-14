@@ -47,6 +47,7 @@ public class Commands implements CommandExecutor {
 				sendError(sender, 0);
 			} else {
 				newItem(sender.getName(), price);
+				MarketManager.get().flush();
 			}
 		} catch (NumberFormatException e) {
 			sendError(sender, 0);
@@ -89,7 +90,7 @@ public class Commands implements CommandExecutor {
 	}
 
 	private void showMarket(Player player) {
-		Inventory inv = MarketManager.get().getInvs().get(0);
+		Inventory inv = MarketManager.get().getPages().get(0);
 		player.openInventory(inv);
 	}
 }
