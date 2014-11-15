@@ -46,6 +46,7 @@ public class Commands implements CommandExecutor {
 			if (price <= 0) {
 				sendError(sender, 0);
 			} else {
+				sendInfo(sender, 0);
 				newItem(sender.getName(), price);
 				MarketManager.get().flush();
 			}
@@ -74,6 +75,14 @@ public class Commands implements CommandExecutor {
 		record.put("items", items);
 		table.insert(record);
 		TableManager.getManager().saveTable("NaturalMarket");
+	}
+
+	private void sendInfo(CommandSender sender, int i) {
+		switch (i) {
+		case 0:
+			sender.sendMessage(ChatColor.GOLD + "上架成功");
+			break;
+		}
 	}
 
 	private void sendError(CommandSender sender, int i) {
