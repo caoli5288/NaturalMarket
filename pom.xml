@@ -4,6 +4,14 @@
 	<groupId>com.mengcraft</groupId>
 	<artifactId>naturalmarket</artifactId>
 	<version>0.1.0</version>
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
 	<repositories>
 		<repository>
 			<id>repo.comphenix.net </id>
@@ -28,7 +36,7 @@
 		<dependency>
 			<groupId>com.mengcraft</groupId>
 			<artifactId>mengdb</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.comphenix.protocol</groupId>

@@ -34,10 +34,28 @@ public class Commands implements CommandExecutor {
 			} else if (args.length < 3) {
 				if (args[0].equals("list")) {
 					listItem(sender, args[1]);
+				} else if (args[0].equals("down")) {
+					downItem(sender, args[1]);
 				}
 			}
 		}
 		return true;
+	}
+
+	private void downItem(CommandSender sender, String string) {
+		try {
+			int id = Integer.parseInt(string);
+			downItem(id);
+		} catch (NumberFormatException e) {
+			sendError(sender, 1);
+		}
+	}
+
+	private boolean downItem(int id) {
+		// TODO 写好下架, 下架完开个线程重排序号, 排完刷新
+		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+//		MengRecord record = table.find(key, value);
+		return false;
 	}
 
 	private void listItem(CommandSender sender, String string) {
@@ -89,6 +107,9 @@ public class Commands implements CommandExecutor {
 		switch (i) {
 		case 0:
 			sender.sendMessage(ChatColor.RED + "价格设置错误");
+			break;
+		case 1:
+			sender.sendMessage(ChatColor.RED + "物品选取错误");
 			break;
 		}
 	}

@@ -6,7 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -36,6 +39,7 @@ public class MarketManager {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
 		Iterator<MengRecord> records = table.find().iterator();
 		List<ItemStack> stacks = new ArrayList<ItemStack>();
+		kickViewers();
 		getPages().clear();
 		while (records.hasNext()) {
 			ItemStack stack = genItemStack(records.next());
@@ -47,6 +51,27 @@ public class MarketManager {
 			}
 		}
 		newInv(stacks);
+	}
+
+	private void kickViewers() {
+		for (Inventory inventory : getPages()) {
+			for (HumanEntity entity : inventory.getViewers()) {
+				entity.closeInventory();
+				sendError(entity, 0);
+			}
+		}
+	}
+
+	private void sendError(HumanEntity entity, int i) {
+		sendError(NaturalMarket.get().getServer().getPlayerExact(entity.getName()),i);
+	}
+	
+	private void sendError(Player player, int i){
+		switch (i) {
+		case 0:
+			player.sendMessage(ChatColor.RED+"商店正在更新信息");
+			break;
+		}
 	}
 
 	private void newInv(List<ItemStack> stacks) {

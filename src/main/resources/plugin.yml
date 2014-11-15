@@ -1,5 +1,5 @@
 name: NaturalMarket
-version: 0.1.0
+version: ${project.version}
 main: com.mengcraft.market.NaturalMarket
 
 commands:
