@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mengcraft</groupId>
 	<artifactId>naturalmarket</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.0</version><name>NaturalMarket</name>
 	<build>
 		<resources>
 			<resource>
@@ -44,4 +44,5 @@
 			<version>3.4.0</version>
 		</dependency>
 	</dependencies>
+	
 </project>

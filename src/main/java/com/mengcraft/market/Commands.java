@@ -1,6 +1,7 @@
 package com.mengcraft.market;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -45,16 +46,29 @@ public class Commands implements CommandExecutor {
 	private void downItem(CommandSender sender, String string) {
 		try {
 			int id = Integer.parseInt(string);
-			downItem(id);
+			if (!downItem(id)) {
+				sendError(sender, 1);
+			}
 		} catch (NumberFormatException e) {
 			sendError(sender, 1);
 		}
 	}
 
 	private boolean downItem(int id) {
-		// TODO 写好下架, 下架完开个线程重排序号, 排完刷新
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-//		MengRecord record = table.find(key, value);
+		List<MengRecord> one = table.find("id", id);
+		if (one.isEmpty()) {
+			return false;
+		} else {
+			table.delete(one);
+			List<MengRecord> records = table.find();
+			for (int i = 0; i < records.size(); i = i + 1) {
+				MengRecord record = records.get(i);
+				record.put("id", i);
+				table.update(record);
+			}
+			MarketManager.get().flush();
+		}
 		return false;
 	}
 
