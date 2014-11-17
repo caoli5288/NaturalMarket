@@ -48,4 +48,7 @@
 			</resource>
 		</resources>
 	</build>
+	<scm>
+		<connection>git:https://github.com/caoli5288/NaturalMarket.git</connection>
+	</scm>
 </project>

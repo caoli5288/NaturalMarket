@@ -2,7 +2,6 @@ package com.mengcraft.market;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -37,17 +36,19 @@ public class MarketManager {
 
 	public void flush() {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-		Iterator<MengRecord> records = table.find().iterator();
+		List<MengRecord> records = table.find();
 		List<ItemStack> stacks = new ArrayList<ItemStack>();
 		kickViewers();
 		getPages().clear();
-		while (records.hasNext()) {
-			ItemStack stack = genItemStack(records.next());
-			if (stacks.size() < 40) {
-				stacks.add(stack);
-			} else {
-				newInv(stacks);
-				stacks.add(stack);
+		for (MengRecord record : records) {
+			if (record.containsKey("items")) {
+				ItemStack stack = genItemStack(record);
+				if (stacks.size() < 40) {
+					stacks.add(stack);
+				} else {
+					newInv(stacks);
+					stacks.add(stack);
+				}
 			}
 		}
 		newInv(stacks);
@@ -63,13 +64,13 @@ public class MarketManager {
 	}
 
 	private void sendError(HumanEntity entity, int i) {
-		sendError(NaturalMarket.get().getServer().getPlayerExact(entity.getName()),i);
+		sendError(NaturalMarket.get().getServer().getPlayerExact(entity.getName()), i);
 	}
-	
-	private void sendError(Player player, int i){
+
+	private void sendError(Player player, int i) {
 		switch (i) {
 		case 0:
-			player.sendMessage(ChatColor.RED+"商店正在更新信息");
+			player.sendMessage(ChatColor.RED + "商店正在更新信息");
 			break;
 		}
 	}
@@ -102,9 +103,9 @@ public class MarketManager {
 			ItemStack stack = StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
 			ItemMeta meta = stack.getItemMeta();
 			List<String> lore = meta.getLore() != null ? meta.getLore() : new ArrayList<String>();
-			lore.add(0, "卖出价格: " + record.getDouble("price") * 0.8);
-			lore.add(0, "买入价格: " + record.getDouble("price"));
-			lore.add(0, "商品编号: " + record.getInteger("id"));
+			lore.add(0, "卖出价格: " + record.getDouble("price") * 0.8); // 2
+			lore.add(0, "买入价格: " + record.getDouble("price"));  // 1
+			lore.add(0, "商品编号: " + record.getInteger("id"));  // 0
 			meta.setLore(lore);
 			stack.setItemMeta(meta);
 			return stack;
