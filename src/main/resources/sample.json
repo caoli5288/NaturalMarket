@@ -1,5 +1,9 @@
 {
 	"any_uid":{
+		"type":"max",
+		"max":integer
+	},
+	"any_uid":{
 		"id":integer,
 		"price":double,
 		"sales":integer,

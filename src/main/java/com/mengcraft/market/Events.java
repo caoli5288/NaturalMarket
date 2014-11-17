@@ -11,7 +11,7 @@ public class Events implements Listener {
 	@EventHandler
 	public void onMarket(InventoryClickEvent event) {
 		if (event.getClickedInventory() != null && event.getClickedInventory().getTitle().startsWith("NaturalMarket")) {
-			System.out.println("Events.OnMarket.Hitting");
+//			System.out.println("Events.OnMarket.Hitting");
 			System.out.println("Events.OnMarket.Slot." + event.getSlot());
 			event.setCancelled(true);
 			if (event.getSlot() > -1) {

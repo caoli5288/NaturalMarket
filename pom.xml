@@ -3,15 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mengcraft</groupId>
 	<artifactId>naturalmarket</artifactId>
-	<version>0.1.0</version><name>NaturalMarket</name>
-	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
-	</build>
+	<version>0.1.0</version>
+	<name>NaturalMarket</name>
+	
 	<repositories>
 		<repository>
 			<id>repo.comphenix.net </id>
@@ -22,6 +16,7 @@
 			<url>http://repo.md-5.net/content/groups/public/</url>
 		</repository>
 	</repositories>
+	
 	<dependencies>
 		<dependency>
 			<groupId>net.milkbowl.vault</groupId>
@@ -45,4 +40,12 @@
 		</dependency>
 	</dependencies>
 	
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
 </project>
