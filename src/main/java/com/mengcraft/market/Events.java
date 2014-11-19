@@ -1,8 +1,9 @@
 package com.mengcraft.market;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -57,20 +58,58 @@ public class Events implements Listener {
 
 	private void sell(String name, ItemStack stack) {
 		int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
-		// This object is prototype item stack
+		// This object "item" is prototype item stack
 		ItemStack item = getStack(id);
 		Inventory inventory = Bukkit.getPlayerExact(name).getInventory();
-		List<ItemStack> list = new ArrayList<ItemStack>();
-		for (ItemStack next : inventory) {
-			if (compareItemStack(item, next)) {
-				list.add(next);
+		// List<ItemStack> list = new ArrayList<ItemStack>();
+		Map<Integer, ItemStack> map = new HashMap<Integer, ItemStack>();
+		int amount = 0;
+		ItemStack[] stacks = inventory.getContents();
+		for (int count = 0; count < stacks.length; count = count + 1) {
+			if (compareItemStack(item, stacks[count])) {
+				map.put(count, stacks[count]);
+				amount = amount + stacks[count].getAmount();
 			}
 		}
-		// TODO
+		if (amount < item.getAmount()) {
+			sendInfo(name, 0);
+		} else {
+			cutItem(inventory, map, item.getAmount());
+			double price = new Double(stack.getItemMeta().getLore().get(1).split(" ")[1]);
+			NaturalMarket.getEconomy().depositPlayer(name, price);
+			logMarket(id, false);
+		}
+	}
+
+	private void cutItem(Inventory inventory, Map<Integer, ItemStack> map, int amount) {
+		int i = 0;
+		for (Entry<Integer, ItemStack> entry : map.entrySet()) {
+			if (entry.getValue().getAmount() < amount - i) {
+				i = i + entry.getValue().getAmount();
+				inventory.setItem(entry.getKey(), new ItemStack(Material.AIR));
+			} else {
+				if (entry.getValue().getAmount() > amount - i) {
+					entry.getValue().setAmount(entry.getValue().getAmount() - amount + i);
+					return;
+				} else {
+					inventory.setItem(entry.getKey(), new ItemStack(Material.AIR));
+					return;
+				}
+			}
+		}
+	}
+
+	private void sendInfo(String name, int i) {
+		Player player = Bukkit.getPlayerExact(name);
+		switch (i) {
+		case 0:
+			player.sendMessage(ChatColor.RED + "你没有此物品无法出售");
+			break;
+		}
 	}
 
 	private boolean compareItemStack(ItemStack item, ItemStack stack) {
-		if (item.getType().equals(stack.getType())) {
+		if (stack != null && item.getType().equals(stack.getType())) {
 			ItemMeta itemMeta = item.getItemMeta();
 			ItemMeta stackMeta = stack.getItemMeta();
 			if (itemMeta == null && stackMeta == null) {
