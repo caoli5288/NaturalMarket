@@ -1,5 +1,10 @@
 package com.mengcraft.market;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -12,6 +17,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.comphenix.protocol.utility.StreamSerializer;
+import com.mengcraft.db.MengRecord;
+import com.mengcraft.db.MengTable;
+import com.mengcraft.db.TableManager;
+
 public class Events implements Listener {
 
 	@EventHandler
@@ -22,8 +32,12 @@ public class Events implements Listener {
 			event.setCancelled(true);
 			if (event.getSlot() > -1) {
 				if (event.getSlot() < 40) {
-					if (event.getClick() == ClickType.LEFT && event.getCurrentItem().getType() != Material.AIR) {
-						buy(event.getWhoClicked().getName(), event.getCurrentItem());
+					if (event.getCurrentItem().getType() != Material.AIR) {
+						if (event.getClick().equals(ClickType.LEFT)) {
+							buy(event.getWhoClicked().getName(), event.getCurrentItem());
+						} else if (event.getClick().equals(ClickType.RIGHT)) {
+							sell(event.getWhoClicked().getName(), event.getCurrentItem());
+						}
 					}
 				} else {
 					switch (event.getSlot()) {
@@ -41,26 +55,72 @@ public class Events implements Listener {
 		}
 	}
 
+	private void sell(String name, ItemStack stack) {
+		int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
+		// This object is prototype item stack
+		ItemStack item = getStack(id);
+		Inventory inventory = Bukkit.getPlayerExact(name).getInventory();
+		List<ItemStack> list = new ArrayList<ItemStack>();
+		for (ItemStack next : inventory) {
+			if (compareItemStack(item, next)) {
+				list.add(next);
+			}
+		}
+		// TODO
+	}
+
+	private boolean compareItemStack(ItemStack item, ItemStack stack) {
+		if (item.getType().equals(stack.getType())) {
+			ItemMeta itemMeta = item.getItemMeta();
+			ItemMeta stackMeta = stack.getItemMeta();
+			if (itemMeta == null && stackMeta == null) {
+				return true;
+			} else if (itemMeta != null && stackMeta != null) {
+				if (itemMeta.toString().equals(stackMeta.toString())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private void buy(String name, ItemStack stack) {
 		double price = new Double(stack.getItemMeta().getLore().get(1).split(" ")[1]);
-		System.out.println("Events.Buy.Buyer." + name);
+		int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
+		// System.out.println("Events.Buy.Buyer." + name);
 		if (NaturalMarket.getEconomy().has(name, price)) {
 			NaturalMarket.getEconomy().withdrawPlayer(name, price);
-			ItemStack item = stack.clone();
-			ItemMeta meta = item.getItemMeta();
-			if (meta.getLore().size() < 4) {
-				meta.setLore(null);
-			} else {
-				meta.setLore(meta.getLore().subList(3, meta.getLore().size()));
-			}
-			item.setItemMeta(meta);
-			Player player = NaturalMarket.get().getServer().getPlayerExact(name);
+			Player player = Bukkit.getPlayerExact(name);
+			ItemStack item = getStack(id);
 			if (player.getInventory().addItem(item).size() > 0) {
 				player.getWorld().dropItem(player.getLocation(), item);
 			}
+			logMarket(id, true);
 		} else {
 			NaturalMarket.get().getServer().getPlayerExact(name).sendMessage(ChatColor.RED + "账户余额不足");
 		}
+	}
+
+	private ItemStack getStack(int i) {
+		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengRecord record = table.find("id", i).get(0);
+		try {
+			return StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private void logMarket(int i, boolean isBuy) {
+		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengRecord record = table.find("id", i).get(0);
+		if (isBuy) {
+			record.put("sales", record.getInteger("sales") + 1);
+		} else {
+			record.put("sales", record.getInteger("sales") - 1);
+		}
+		table.update(record);
 	}
 
 	private void showNextPage(HumanEntity who, Inventory inventory, boolean isNext) {

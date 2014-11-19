@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.mengcraft</groupId>
 	<artifactId>naturalmarket</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<name>NaturalMarket</name>
 	
 	<repositories>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.mengcraft</groupId>
 			<artifactId>mengdb</artifactId>
-			<version>0.1.1</version>
+			<version>0.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.comphenix.protocol</groupId>
@@ -48,7 +48,4 @@
 			</resource>
 		</resources>
 	</build>
-	<scm>
-		<connection>git:https://github.com/caoli5288/NaturalMarket.git</connection>
-	</scm>
 </project>
