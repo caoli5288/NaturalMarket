@@ -27,31 +27,28 @@ public class Events implements Listener {
 
 	@EventHandler
 	public void onMarket(InventoryClickEvent event) {
-		if (event.getClickedInventory() != null && event.getClickedInventory().getTitle().startsWith("NaturalMarket")) {
+		if (event.getClickedInventory() != null && event.getView().getTitle().startsWith("NaturalMarket")) {
 			// System.out.println("Events.OnMarket.Hitting");
-			System.out.println("Events.OnMarket.Slot." + event.getSlot());
+			// System.out.println("Events.OnMarket.Slot." + event.getSlot());
 			event.setCancelled(true);
-			if (event.getSlot() > -1) {
-				if (event.getSlot() < 40) {
-					if (event.getCurrentItem().getType() != Material.AIR) {
-						if (event.getClick().equals(ClickType.LEFT)) {
-							buy(event.getWhoClicked().getName(), event.getCurrentItem());
-						} else if (event.getClick().equals(ClickType.RIGHT)) {
-							sell(event.getWhoClicked().getName(), event.getCurrentItem());
-						}
-					}
-				} else {
-					switch (event.getSlot()) {
-					// 上一页
-					case 51:
-						showNextPage(event.getWhoClicked(), event.getClickedInventory(), false);
-						break;
-					// 下一页
-					case 53:
-						showNextPage(event.getWhoClicked(), event.getClickedInventory(), true);
-						break;
-					}
+			if (event.getClickedInventory().getTitle().startsWith("NaturalMarket")) {
+				marketAct(event);
+			}
+		}
+	}
+
+	private void marketAct(InventoryClickEvent event) {
+		if (event.getCurrentItem().getType() != Material.AIR) {
+			if (event.getSlot() < 40) {
+				if (event.getClick().equals(ClickType.LEFT)) {
+					buy(event.getWhoClicked().getName(), event.getCurrentItem());
+				} else if (event.getClick().equals(ClickType.RIGHT)) {
+					sell(event.getWhoClicked().getName(), event.getCurrentItem());
 				}
+			} else if (event.getSlot() == 51) {
+				showNextPage(event.getWhoClicked(), event.getClickedInventory(), false);
+			} else if (event.getSlot() == 53) {
+				showNextPage(event.getWhoClicked(), event.getClickedInventory(), true);
 			}
 		}
 	}
@@ -61,7 +58,6 @@ public class Events implements Listener {
 		// This object "item" is prototype item stack
 		ItemStack item = getStack(id);
 		Inventory inventory = Bukkit.getPlayerExact(name).getInventory();
-		// List<ItemStack> list = new ArrayList<ItemStack>();
 		Map<Integer, ItemStack> map = new HashMap<Integer, ItemStack>();
 		int amount = 0;
 		ItemStack[] stacks = inventory.getContents();
