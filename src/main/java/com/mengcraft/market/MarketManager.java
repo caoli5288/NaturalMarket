@@ -42,20 +42,18 @@ public class MarketManager {
 		setLock(true);
 
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-		List<MengRecord> records = table.find();
+		List<MengRecord> records = table.find("items");
 		List<ItemStack> stacks = new ArrayList<ItemStack>();
 
 		kickViewers();
 		getPages().clear();
 		for (MengRecord record : records) {
-			if (record.containsKey("items")) {
-				ItemStack stack = genItemStack(record);
-				if (stacks.size() < 40) {
-					stacks.add(stack);
-				} else {
-					newInv(stacks);
-					stacks.add(stack);
-				}
+			ItemStack stack = genItemStack(record);
+			if (stacks.size() < 40) {
+				stacks.add(stack);
+			} else {
+				newInv(stacks);
+				stacks.add(stack);
 			}
 		}
 		newInv(stacks);
@@ -64,7 +62,8 @@ public class MarketManager {
 
 	private void kickViewers() {
 		for (Inventory inventory : getPages()) {
-			List<HumanEntity> entities = new ArrayList<HumanEntity>(inventory.getViewers());
+			List<HumanEntity> entities = new ArrayList<HumanEntity>(
+					inventory.getViewers());
 			for (HumanEntity entity : entities) {
 				entity.closeInventory();
 				sendError(entity, 0);
@@ -73,7 +72,9 @@ public class MarketManager {
 	}
 
 	private void sendError(HumanEntity entity, int i) {
-		sendError(NaturalMarket.get().getServer().getPlayerExact(entity.getName()), i);
+		sendError(
+				NaturalMarket.get().getServer()
+						.getPlayerExact(entity.getName()), i);
 	}
 
 	private void sendError(Player player, int i) {
@@ -85,7 +86,8 @@ public class MarketManager {
 	}
 
 	private void newInv(List<ItemStack> stacks) {
-		Inventory inv = Bukkit.createInventory(null, 54, "NaturalMarket" + ":" + getPages().size());
+		Inventory inv = Bukkit.createInventory(null, 54, "NaturalMarket" + ":"
+				+ getPages().size());
 		inv.setContents(stacks.toArray(new ItemStack[45]));
 		inv.setItem(53, getNextPoint(true));
 		inv.setItem(51, getNextPoint(false));
@@ -94,16 +96,15 @@ public class MarketManager {
 	}
 
 	private ItemStack getNextPoint(boolean isNext) {
-		ItemStack stack = new ItemStack(Material.PAPER);
-		ItemMeta itemMeta = stack.getItemMeta();
-		List<String> lore = new ArrayList<String>();
+		ItemStack stack = new ItemStack(Material.MELON);
+		ItemMeta meta = stack.getItemMeta();
 		if (isNext) {
-			lore.add("下一页");
+			stack.setType(Material.SPECKLED_MELON);
+			meta.setDisplayName(ChatColor.GOLD + "下一页");
 		} else {
-			lore.add("上一页");
+			meta.setDisplayName(ChatColor.GOLD + "上一页");
 		}
-		itemMeta.setLore(lore);
-		stack.setItemMeta(itemMeta);
+		stack.setItemMeta(meta);
 		return stack;
 	}
 
