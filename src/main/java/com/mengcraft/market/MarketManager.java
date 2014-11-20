@@ -36,6 +36,28 @@ public class MarketManager {
 		return pages;
 	}
 
+	public ItemStack getStack(int i) {
+		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengRecord record = table.find("id", i).get(0);
+		try {
+			return StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public void setStackLog(int id, boolean isBuy) {
+		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengRecord record = table.find("id", id).get(0);
+		if (isBuy) {
+			record.put("sales", record.getInteger("sales") + 1);
+		} else {
+			record.put("sales", record.getInteger("sales") - 1);
+		}
+		table.update(record);
+	}
+
 	public void listStack(ItemStack stack, double price) {
 		try {
 			MengTable table = TableManager.getManager().getTable("NaturalMarket");
@@ -69,6 +91,7 @@ public class MarketManager {
 		} else {
 			table.delete(one);
 			MarketManager.getManager().flushPage();
+			TableManager.getManager().saveTable("NaturalMarket");
 			return true;
 		}
 	}
@@ -98,14 +121,16 @@ public class MarketManager {
 		}
 	}
 
+	// 从list移除 > 踢掉viewer > 清空内容
 	private void cutPage(List<ItemStack[]> list) {
 		if (getPages().size() > list.size()) {
 			int i = getPages().size() - 1;
-			for (HumanEntity entity : new ArrayList<HumanEntity>(getPages().get(i).getViewers())) {
+			Inventory page = getPages().get(i);
+			getPages().remove(i);
+			for (HumanEntity entity : new ArrayList<HumanEntity>(page.getViewers())) {
 				entity.openInventory(getPages().get(0));
 			}
-			getPages().get(i).clear();
-			getPages().remove(i);
+			page.clear();
 			cutPage(list);
 		} else if (getPages().size() < list.size()) {
 			getPages().add(Bukkit.createInventory(null, 54, "NaturalMarket:" + getPages().size()));

@@ -8,8 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import com.mengcraft.db.TableManager;
-
 public class Commands implements CommandExecutor {
 
 	@Override
@@ -17,21 +15,25 @@ public class Commands implements CommandExecutor {
 		if (args.length < 1) {
 			showMarket(sender);
 		} else if (sender.hasPermission("market.admin")) {
-			if (args.length < 2) {
-				if (args[0].equals("flush")) {
-					MarketManager.getManager().flushPage();
-				} else if (args[0].equals("price")) {
-					PriceTask.getTask().run();
-				}
-			} else if (args.length < 3) {
-				if (args[0].equals("list")) {
-					listItem(sender, args[1]);
-				} else if (args[0].equals("down")) {
-					downItem(sender, args[1]);
-				}
-			}
+			adminCommand(sender, args);
 		}
 		return true;
+	}
+
+	private void adminCommand(CommandSender sender, String[] args) {
+		if (args.length < 2) {
+			if (args[0].equals("flush")) {
+				MarketManager.getManager().flushPage();
+			} else if (args[0].equals("price")) {
+				PriceTask.getTask().run();
+			}
+		} else if (args.length < 3) {
+			if (args[0].equals("list")) {
+				listItem(sender, args[1]);
+			} else if (args[0].equals("down")) {
+				downItem(sender, args[1]);
+			}
+		}
 	}
 
 	private void downItem(CommandSender sender, String string) {
@@ -39,7 +41,6 @@ public class Commands implements CommandExecutor {
 			int id = Integer.parseInt(string);
 			if (MarketManager.getManager().downStack(id)) {
 				sendInfo(sender, 1);
-				TableManager.getManager().saveTable("NaturalMarket");
 			} else {
 				sendInfo(sender, 3);
 				// System.out.println("Commands.DownItem.CanNotFind");

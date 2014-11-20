@@ -1,6 +1,5 @@
 package com.mengcraft.market;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,13 +17,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.comphenix.protocol.utility.StreamSerializer;
-import com.mengcraft.db.MengRecord;
-import com.mengcraft.db.MengTable;
-import com.mengcraft.db.TableManager;
-
 public class Events implements Listener {
-
 	@EventHandler
 	public void onMarket(InventoryClickEvent event) {
 		if (event.getClickedInventory() != null && event.getView().getTitle().startsWith("NaturalMarket")) {
@@ -33,12 +26,12 @@ public class Events implements Listener {
 			event.setCancelled(true);
 			Bukkit.getScheduler().runTaskLater(NaturalMarket.get(), new FlushInventory(event.getWhoClicked().getName()), 1);
 			if (event.getClickedInventory().getTitle().startsWith("NaturalMarket")) {
-				marketAct(event);
+				clickAct(event);
 			}
 		}
 	}
 
-	private void marketAct(InventoryClickEvent event) {
+	private void clickAct(InventoryClickEvent event) {
 		if (event.getCurrentItem().getType() != Material.AIR) {
 			if (event.getSlot() < 40) {
 				if (event.getClick().equals(ClickType.LEFT)) {
@@ -57,13 +50,13 @@ public class Events implements Listener {
 	private void sell(String name, ItemStack stack) {
 		int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
 		// This object "item" is prototype item stack
-		ItemStack item = getStack(id);
+		ItemStack item = MarketManager.getManager().getStack(id);
 		Inventory inventory = Bukkit.getPlayerExact(name).getInventory();
 		Map<Integer, ItemStack> map = new HashMap<Integer, ItemStack>();
 		int amount = 0;
 		ItemStack[] stacks = inventory.getContents();
 		for (int count = 0; count < stacks.length; count = count + 1) {
-			if (compareItemStack(item, stacks[count])) {
+			if (compareStack(item, stacks[count])) {
 				map.put(count, stacks[count]);
 				amount = amount + stacks[count].getAmount();
 			}
@@ -71,14 +64,14 @@ public class Events implements Listener {
 		if (amount < item.getAmount()) {
 			sendInfo(name, 0);
 		} else {
-			cutItem(inventory, map, item.getAmount());
+			pickStack(inventory, map, item.getAmount());
 			double price = new Double(stack.getItemMeta().getLore().get(1).split(" ")[1]);
 			NaturalMarket.getEconomy().depositPlayer(name, price);
-			logMarket(id, false);
+			MarketManager.getManager().setStackLog(id, false);
 		}
 	}
 
-	private void cutItem(Inventory inventory, Map<Integer, ItemStack> map, int amount) {
+	private void pickStack(Inventory inventory, Map<Integer, ItemStack> map, int amount) {
 		int i = 0;
 		for (Entry<Integer, ItemStack> entry : map.entrySet()) {
 			if (entry.getValue().getAmount() < amount - i) {
@@ -96,16 +89,7 @@ public class Events implements Listener {
 		}
 	}
 
-	private void sendInfo(String name, int i) {
-		Player player = Bukkit.getPlayerExact(name);
-		switch (i) {
-		case 0:
-			player.sendMessage(ChatColor.RED + "你没有此物品无法出售");
-			break;
-		}
-	}
-
-	private boolean compareItemStack(ItemStack item, ItemStack stack) {
+	private boolean compareStack(ItemStack item, ItemStack stack) {
 		if (stack != null && item.getType().equals(stack.getType())) {
 			ItemMeta itemMeta = item.getItemMeta();
 			ItemMeta stackMeta = stack.getItemMeta();
@@ -127,36 +111,14 @@ public class Events implements Listener {
 		if (NaturalMarket.getEconomy().has(name, price)) {
 			NaturalMarket.getEconomy().withdrawPlayer(name, price);
 			Player player = Bukkit.getPlayerExact(name);
-			ItemStack item = getStack(id);
+			ItemStack item = MarketManager.getManager().getStack(id);
 			if (player.getInventory().addItem(item).size() > 0) {
 				player.getWorld().dropItem(player.getLocation(), item);
 			}
-			logMarket(id, true);
+			MarketManager.getManager().setStackLog(id, true);
 		} else {
 			NaturalMarket.get().getServer().getPlayerExact(name).sendMessage(ChatColor.RED + "账户余额不足");
 		}
-	}
-
-	private ItemStack getStack(int i) {
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-		MengRecord record = table.find("id", i).get(0);
-		try {
-			return StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private void logMarket(int i, boolean isBuy) {
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-		MengRecord record = table.find("id", i).get(0);
-		if (isBuy) {
-			record.put("sales", record.getInteger("sales") + 1);
-		} else {
-			record.put("sales", record.getInteger("sales") - 1);
-		}
-		table.update(record);
 	}
 
 	private void showNextPage(HumanEntity who, Inventory inventory, boolean isNext) {
@@ -166,11 +128,19 @@ public class Events implements Listener {
 		} else {
 			curPage = curPage - 1;
 		}
-		NaturalMarket.get().getServer().getScheduler().runTaskLater(NaturalMarket.get(), new ShowNewPage(who.getName(), curPage), 1);
+		NaturalMarket.get().getServer().getScheduler().runTaskLater(NaturalMarket.get(), new ShowMarketPage(who.getName(), curPage), 1);
+	}
+
+	private void sendInfo(String name, int i) {
+		Player player = Bukkit.getPlayerExact(name);
+		switch (i) {
+		case 0:
+			player.sendMessage(ChatColor.RED + "你没有此物品无法出售");
+			break;
+		}
 	}
 
 	private class FlushInventory implements Runnable {
-
 		private final String name;
 
 		public FlushInventory(String name) {
@@ -188,11 +158,11 @@ public class Events implements Listener {
 		}
 	}
 
-	private class ShowNewPage implements Runnable {
+	private class ShowMarketPage implements Runnable {
 		private final String name;
 		private final int page;
 
-		public ShowNewPage(String name, int page) {
+		public ShowMarketPage(String name, int page) {
 			this.name = name;
 			this.page = page > -1 ? page < MarketManager.getManager().getPages().size() ? page : 0 : MarketManager.getManager().getPages().size() - 1;
 		}
