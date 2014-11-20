@@ -24,6 +24,10 @@ public class PriceTask implements Runnable {
 			BigDecimal multi = new BigDecimal(new Random().nextInt(1024)).divide(new BigDecimal("10240"));
 			if (record.getInteger("sales") > 0) {
 				price = price.add(price.multiply(multi));
+			} else if (record.getInteger("sales") < 0){
+				price = price.subtract(price.multiply(multi));
+			} else if (new Random().nextBoolean()){
+				price = price.add(price.multiply(multi));
 			} else {
 				price = price.subtract(price.multiply(multi));
 			}

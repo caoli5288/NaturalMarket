@@ -64,6 +64,7 @@ public class Events implements Listener {
 		if (amount < item.getAmount()) {
 			sendInfo(name, 0);
 		} else {
+			sendInfo(name, 1);
 			pickStack(inventory, map, item.getAmount());
 			double price = new Double(stack.getItemMeta().getLore().get(1).split(" ")[1]);
 			NaturalMarket.getEconomy().depositPlayer(name, price);
@@ -136,6 +137,9 @@ public class Events implements Listener {
 		switch (i) {
 		case 0:
 			player.sendMessage(ChatColor.RED + "你没有此物品无法出售");
+			break;
+		case 1:
+			player.sendMessage(ChatColor.GOLD + "物品出售成功");
 			break;
 		}
 	}
