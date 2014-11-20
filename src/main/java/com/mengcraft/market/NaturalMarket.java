@@ -10,7 +10,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.mcstats.Metrics;
 
 public class NaturalMarket extends JavaPlugin {
-
 	private static NaturalMarket market;
 	private static Economy economy;
 
@@ -29,7 +28,7 @@ public class NaturalMarket extends JavaPlugin {
 		Bukkit.getScheduler().runTaskTimer(get(), PriceTask.getTask(), 72000, 72000);
 		getCommand("market").setExecutor(new Commands());
 		getServer().getPluginManager().registerEvents(new Events(), this);
-		MarketManager.getManager().flush();
+		MarketManager.getManager().flushPage();
 		setupEconomy();
 		getLogger().info("梦梦家高性能服务器出租");
 		getLogger().info("淘宝店 http://shop105595113.taobao.com");

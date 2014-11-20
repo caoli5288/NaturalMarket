@@ -32,7 +32,7 @@ public class PriceTask implements Runnable {
 			table.update(record);
 		}
 		TableManager.getManager().saveTable("NaturalMarket");
-		MarketManager.getManager().flush();
+		MarketManager.getManager().flushPage();
 	}
 
 	public static PriceTask getTask() {

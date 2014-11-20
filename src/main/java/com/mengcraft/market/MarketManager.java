@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -22,12 +21,10 @@ import com.mengcraft.db.TableManager;
 
 public class MarketManager {
 	private final static MarketManager MANAGER = new MarketManager();
-	private final List<Inventory> inventories;
-	private boolean lock;
+	private final List<Inventory> pages;
 
 	private MarketManager() {
-		this.inventories = new ArrayList<Inventory>();
-		setLock(false);
+		this.pages = new ArrayList<Inventory>();
 	}
 
 	public static MarketManager getManager() {
@@ -35,78 +32,71 @@ public class MarketManager {
 	}
 
 	public List<Inventory> getPages() {
-		return inventories;
+		return pages;
 	}
 
-	public void flush() {
-		setLock(true);
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+	public void listStack(ItemStack stack, double price) {
+		// TODO
+	}
+
+	public void downStack(int id) {
+		// TODO
+	}
+
+	public void flushPage() {
+		TableManager manager = TableManager.getManager();
+		MengTable table = manager.getTable("NaturalMarket");
 		List<MengRecord> records = table.find("items");
-		List<ItemStack> stacks = new ArrayList<ItemStack>();
-		kickViewers();
-		getPages().clear();
+		List<ItemStack> list = new ArrayList<ItemStack>();
+		List<ItemStack[]> stacks = new ArrayList<ItemStack[]>();
 		for (MengRecord record : records) {
-			ItemStack stack = genItemStack(record);
-			if (stacks.size() < 40) {
-				stacks.add(stack);
+			ItemStack stack = genStack(record);
+			if (list.size() < 40) {
+				list.add(stack);
 			} else {
-				newInv(stacks);
-				stacks.add(stack);
+				stacks.add(list.toArray(new ItemStack[40]));
+				list.clear();
+				list.add(stack);
 			}
 		}
-		newInv(stacks);
-		setLock(false);
+		stacks.add(list.toArray(new ItemStack[40]));
+		cutPage(stacks);
+		// copy items from list to page
+		for (int i = 0; i < stacks.size(); i = i + 1) {
+			getPages().get(i).setContents(stacks.get(i));
+			setPagePoint(getPages().get(i));
+		}
 	}
 
-	private void kickViewers() {
-		for (Inventory inventory : getPages()) {
-			List<HumanEntity> entities = new ArrayList<HumanEntity>(
-					inventory.getViewers());
-			for (HumanEntity entity : entities) {
-				entity.closeInventory();
-				sendError(entity, 0);
+	private void cutPage(List<ItemStack[]> list) {
+		if (getPages().size() > list.size()) {
+			int i = getPages().size() - 1;
+			for (HumanEntity entity : new ArrayList<HumanEntity>(getPages().get(i).getViewers())) {
+				entity.openInventory(getPages().get(0));
 			}
+			getPages().get(i).clear();
+			getPages().remove(i);
+			cutPage(list);
+		} else if (getPages().size() < list.size()) {
+			getPages().add(Bukkit.createInventory(null, 54, "NaturalMarket:" + getPages().size()));
+			cutPage(list);
 		}
 	}
 
-	private void sendError(HumanEntity entity, int i) {
-		sendError(
-				NaturalMarket.get().getServer()
-						.getPlayerExact(entity.getName()), i);
+	private void setPagePoint(Inventory inventory) {
+		ItemStack prev = new ItemStack(Material.MELON);
+		ItemStack next = new ItemStack(Material.SPECKLED_MELON);
+		ItemMeta prevMeta = prev.getItemMeta();
+		prevMeta.setDisplayName(ChatColor.GOLD + "上一页");
+		ItemMeta nextMeta = next.getItemMeta();
+		nextMeta.setDisplayName(ChatColor.GOLD + "下一页");
+		prev.setItemMeta(prevMeta);
+		next.setItemMeta(nextMeta);
+		inventory.setItem(53, next);
+		inventory.setItem(51, prev);
 	}
 
-	private void sendError(Player player, int i) {
-		switch (i) {
-		case 0:
-			player.sendMessage(ChatColor.RED + "商店正在更新信息");
-			break;
-		}
-	}
-
-	private void newInv(List<ItemStack> stacks) {
-		Inventory inv = Bukkit.createInventory(null, 54, "NaturalMarket" + ":"
-				+ getPages().size());
-		inv.setContents(stacks.toArray(new ItemStack[45]));
-		inv.setItem(53, getNextPoint(true));
-		inv.setItem(51, getNextPoint(false));
-		getPages().add(inv);
-		stacks.clear();
-	}
-
-	private ItemStack getNextPoint(boolean isNext) {
-		ItemStack stack = new ItemStack(Material.MELON);
-		ItemMeta meta = stack.getItemMeta();
-		if (isNext) {
-			stack.setType(Material.SPECKLED_MELON);
-			meta.setDisplayName(ChatColor.GOLD + "下一页");
-		} else {
-			meta.setDisplayName(ChatColor.GOLD + "上一页");
-		}
-		stack.setItemMeta(meta);
-		return stack;
-	}
-
-	private ItemStack genItemStack(MengRecord record) {
+	private ItemStack genStack(MengRecord record) {
 		try {
 			ItemStack stack = StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
 			ItemMeta meta = stack.getItemMeta();
@@ -122,13 +112,5 @@ public class MarketManager {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	public boolean isLock() {
-		return lock;
-	}
-
-	public void setLock(boolean lock) {
-		this.lock = lock;
 	}
 }
