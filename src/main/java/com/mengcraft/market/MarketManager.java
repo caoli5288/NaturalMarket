@@ -25,7 +25,7 @@ public class MarketManager {
 	private final List<Inventory> inventories;
 	private boolean lock;
 
-	public MarketManager() {
+	private MarketManager() {
 		this.inventories = new ArrayList<Inventory>();
 		setLock(false);
 	}
@@ -40,11 +40,9 @@ public class MarketManager {
 
 	public void flush() {
 		setLock(true);
-
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
 		List<MengRecord> records = table.find("items");
 		List<ItemStack> stacks = new ArrayList<ItemStack>();
-
 		kickViewers();
 		getPages().clear();
 		for (MengRecord record : records) {

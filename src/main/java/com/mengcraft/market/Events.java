@@ -31,6 +31,7 @@ public class Events implements Listener {
 			// System.out.println("Events.OnMarket.Hitting");
 			// System.out.println("Events.OnMarket.Slot." + event.getSlot());
 			event.setCancelled(true);
+			Bukkit.getScheduler().runTaskLater(NaturalMarket.get(), new FlushInventory(event.getWhoClicked().getName()), 1);
 			if (event.getClickedInventory().getTitle().startsWith("NaturalMarket")) {
 				marketAct(event);
 			}
@@ -166,6 +167,25 @@ public class Events implements Listener {
 			curPage = curPage - 1;
 		}
 		NaturalMarket.get().getServer().getScheduler().runTaskLater(NaturalMarket.get(), new ShowNewPage(who.getName(), curPage), 1);
+	}
+
+	private class FlushInventory implements Runnable {
+
+		private final String name;
+
+		public FlushInventory(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public void run() {
+			Player player = Bukkit.getPlayerExact(getName());
+			player.openInventory(player.getOpenInventory().getTopInventory());
+		}
+
+		public String getName() {
+			return name;
+		}
 	}
 
 	private class ShowNewPage implements Runnable {
