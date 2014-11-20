@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.comphenix.protocol.utility.StreamSerializer;
+import com.mengcraft.db.MengBuilder;
 import com.mengcraft.db.MengRecord;
 import com.mengcraft.db.MengTable;
 import com.mengcraft.db.TableManager;
@@ -36,11 +37,40 @@ public class MarketManager {
 	}
 
 	public void listStack(ItemStack stack, double price) {
-		// TODO
+		try {
+			MengTable table = TableManager.getManager().getTable("NaturalMarket");
+			MengRecord max = table.findOne("type", "max");
+			if (max == null) {
+				max = new MengBuilder().getEmptyRecord();
+				max.put("type", "max");
+				max.put("max", 0);
+			}
+			int id = max.getInteger("max");
+			MengRecord record = new MengBuilder().getEmptyRecord();
+			String items = StreamSerializer.getDefault().serializeItemStack(stack);
+			record.put("price", price);
+			record.put("id", id);
+			record.put("items", items);
+			max.put("max", id + 1);
+			table.insert(record);
+			table.update(max);
+			TableManager.getManager().saveTable("NaturalMarket");
+			MarketManager.getManager().flushPage();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void downStack(int id) {
-		// TODO
+	public boolean downStack(int id) {
+		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		List<MengRecord> one = table.find("id", id);
+		if (one.isEmpty()) {
+			return false;
+		} else {
+			table.delete(one);
+			MarketManager.getManager().flushPage();
+			return true;
+		}
 	}
 
 	public void flushPage() {
@@ -50,7 +80,7 @@ public class MarketManager {
 		List<ItemStack> list = new ArrayList<ItemStack>();
 		List<ItemStack[]> stacks = new ArrayList<ItemStack[]>();
 		for (MengRecord record : records) {
-			ItemStack stack = genStack(record);
+			ItemStack stack = genListedStack(record);
 			if (list.size() < 40) {
 				list.add(stack);
 			} else {
@@ -96,7 +126,7 @@ public class MarketManager {
 		inventory.setItem(51, prev);
 	}
 
-	private ItemStack genStack(MengRecord record) {
+	private ItemStack genListedStack(MengRecord record) {
 		try {
 			ItemStack stack = StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
 			ItemMeta meta = stack.getItemMeta();

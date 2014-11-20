@@ -1,18 +1,13 @@
 package com.mengcraft.market;
 
-import java.io.IOException;
-import java.util.List;
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
-import com.comphenix.protocol.utility.StreamSerializer;
-import com.mengcraft.db.MengBuilder;
-import com.mengcraft.db.MengRecord;
-import com.mengcraft.db.MengTable;
 import com.mengcraft.db.TableManager;
 
 public class Commands implements CommandExecutor {
@@ -42,27 +37,15 @@ public class Commands implements CommandExecutor {
 	private void downItem(CommandSender sender, String string) {
 		try {
 			int id = Integer.parseInt(string);
-			if (!downItem(id)) {
-				sendError(sender, 1);
-				System.out.println("Commands.DownItem.CanNotFind");
-			} else {
+			if (MarketManager.getManager().downStack(id)) {
 				sendInfo(sender, 1);
 				TableManager.getManager().saveTable("NaturalMarket");
+			} else {
+				sendInfo(sender, 3);
+				// System.out.println("Commands.DownItem.CanNotFind");
 			}
 		} catch (NumberFormatException e) {
-			sendError(sender, 1);
-		}
-	}
-
-	private boolean downItem(int id) {
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-		List<MengRecord> one = table.find("id", id);
-		if (one.isEmpty()) {
-			return false;
-		} else {
-			table.delete(one);
-			MarketManager.getManager().flushPage();
-			return true;
+			sendInfo(sender, 3);
 		}
 	}
 
@@ -70,41 +53,14 @@ public class Commands implements CommandExecutor {
 		try {
 			Double price = new Double(string);
 			if (price <= 0) {
-				sendError(sender, 0);
+				sendInfo(sender, 2);
 			} else {
 				sendInfo(sender, 0);
-				newItem(sender.getName(), price);
-				MarketManager.getManager().flushPage();
+				ItemStack stack = Bukkit.getPlayerExact(sender.getName()).getItemInHand();
+				MarketManager.getManager().listStack(stack, price);
 			}
 		} catch (NumberFormatException e) {
-			sendError(sender, 0);
-		}
-	}
-
-	private void newItem(String name, double price) {
-		Player player = NaturalMarket.get().getServer().getPlayerExact(name);
-		if (player != null) {
-			try {
-				MengTable table = TableManager.getManager().getTable("NaturalMarket");
-				MengRecord max = table.findOne("type", "max");
-				if (max == null) {
-					max = new MengBuilder().getEmptyRecord();
-					max.put("type", "max");
-					max.put("max", 0);
-				}
-				int id = max.getInteger("max");
-				MengRecord record = new MengBuilder().getEmptyRecord();
-				String items = StreamSerializer.getDefault().serializeItemStack(player.getItemInHand());
-				record.put("price", price);
-				record.put("id", id);
-				record.put("items", items);
-				max.put("max", id + 1);
-				table.insert(record);
-				table.update(max);
-				TableManager.getManager().saveTable("NaturalMarket");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			sendInfo(sender, 2);
 		}
 	}
 
@@ -116,15 +72,10 @@ public class Commands implements CommandExecutor {
 		case 1:
 			sender.sendMessage(ChatColor.GOLD + "物品下架成功");
 			break;
-		}
-	}
-
-	private void sendError(CommandSender sender, int i) {
-		switch (i) {
-		case 0:
+		case 2:
 			sender.sendMessage(ChatColor.RED + "价格设置错误");
 			break;
-		case 1:
+		case 3:
 			sender.sendMessage(ChatColor.RED + "物品选取错误");
 			break;
 		}
