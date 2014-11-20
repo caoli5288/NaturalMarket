@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import net.milkbowl.vault.economy.Economy;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mcstats.Metrics;
@@ -25,6 +26,7 @@ public class NaturalMarket extends JavaPlugin {
 		} catch (IOException e) {
 			getLogger().warning("Can not link to mcstats.org!");
 		}
+		Bukkit.getScheduler().runTaskTimer(get(), PriceTask.getTask(), 72000, 72000);
 		getCommand("market").setExecutor(new Commands());
 		getServer().getPluginManager().registerEvents(new Events(), this);
 		MarketManager.get().flush();

@@ -27,9 +27,9 @@ public class Commands implements CommandExecutor {
 		} else if (sender.hasPermission("market.admin")) {
 			if (args.length < 2) {
 				if (args[0].equals("flush")) {
-					if (sender.hasPermission("market.admin")) {
-						MarketManager.get().flush();
-					}
+					MarketManager.get().flush();
+				} else if (args[0].equals("price")) {
+					PriceTask.getTask().run();
 				}
 			} else if (args.length < 3) {
 				if (args[0].equals("list")) {
@@ -50,6 +50,7 @@ public class Commands implements CommandExecutor {
 				System.out.println("Commands.DownItem.CanNotFind");
 			} else {
 				sendInfo(sender, 1);
+				TableManager.getManager().saveTable("NaturalMarket");
 			}
 		} catch (NumberFormatException e) {
 			sendError(sender, 1);

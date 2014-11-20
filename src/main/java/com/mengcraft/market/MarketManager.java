@@ -55,8 +55,11 @@ public class MarketManager {
 	}
 
 	private void kickViewers() {
+		// TODO 刷新过程中不允许其他人打开商店
+		// TODO 卖出价格需要进行浮点数限制
 		for (Inventory inventory : getPages()) {
-			for (HumanEntity entity : inventory.getViewers()) {
+			List<HumanEntity> entities = new ArrayList<HumanEntity>(inventory.getViewers());
+			for (HumanEntity entity : entities) {
 				entity.closeInventory();
 				sendError(entity, 0);
 			}
@@ -104,8 +107,8 @@ public class MarketManager {
 			ItemMeta meta = stack.getItemMeta();
 			List<String> lore = meta.getLore() != null ? meta.getLore() : new ArrayList<String>();
 			lore.add(0, "卖出价格: " + record.getDouble("price") * 0.8); // 2
-			lore.add(0, "买入价格: " + record.getDouble("price"));  // 1
-			lore.add(0, "商品编号: " + record.getInteger("id"));  // 0
+			lore.add(0, "买入价格: " + record.getDouble("price")); // 1
+			lore.add(0, "商品编号: " + record.getInteger("id")); // 0
 			meta.setLore(lore);
 			stack.setItemMeta(meta);
 			return stack;
