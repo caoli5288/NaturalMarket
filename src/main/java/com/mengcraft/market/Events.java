@@ -174,12 +174,12 @@ public class Events implements Listener {
 
 		public ShowNewPage(String name, int page) {
 			this.name = name;
-			this.page = page > -1 ? page < MarketManager.get().getPages().size() ? page : 0 : MarketManager.get().getPages().size() - 1;
+			this.page = page > -1 ? page < MarketManager.getManager().getPages().size() ? page : 0 : MarketManager.getManager().getPages().size() - 1;
 		}
 
 		@Override
 		public void run() {
-			NaturalMarket.get().getServer().getPlayerExact(getName()).openInventory(MarketManager.get().getPages().get(getPage()));
+			NaturalMarket.get().getServer().getPlayerExact(getName()).openInventory(MarketManager.getManager().getPages().get(getPage()));
 		}
 
 		private int getPage() {

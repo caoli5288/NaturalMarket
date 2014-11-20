@@ -21,13 +21,15 @@ public class Commands implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (args.length < 1) {
-			if (sender instanceof Player) {
+			if (MarketManager.getManager().isLock()) {
+				sendError(sender, 2);
+			} else {
 				showMarket(sender);
 			}
 		} else if (sender.hasPermission("market.admin")) {
 			if (args.length < 2) {
 				if (args[0].equals("flush")) {
-					MarketManager.get().flush();
+					MarketManager.getManager().flush();
 				} else if (args[0].equals("price")) {
 					PriceTask.getTask().run();
 				}
@@ -64,7 +66,7 @@ public class Commands implements CommandExecutor {
 			return false;
 		} else {
 			table.delete(one);
-			MarketManager.get().flush();
+			MarketManager.getManager().flush();
 			return true;
 		}
 	}
@@ -77,7 +79,7 @@ public class Commands implements CommandExecutor {
 			} else {
 				sendInfo(sender, 0);
 				newItem(sender.getName(), price);
-				MarketManager.get().flush();
+				MarketManager.getManager().flush();
 			}
 		} catch (NumberFormatException e) {
 			sendError(sender, 0);
@@ -130,16 +132,21 @@ public class Commands implements CommandExecutor {
 		case 1:
 			sender.sendMessage(ChatColor.RED + "物品选取错误");
 			break;
+		case 2:
+			sender.sendMessage(ChatColor.RED + "商店正在更新信息");
+			break;
 		}
 	}
 
 	private void showMarket(CommandSender sender) {
-		Player player = NaturalMarket.get().getServer().getPlayerExact(sender.getName());
-		showMarket(player);
+		if (sender instanceof Player) {
+			Player player = NaturalMarket.get().getServer().getPlayerExact(sender.getName());
+			showMarket(player);
+		}
 	}
 
 	private void showMarket(Player player) {
-		Inventory inv = MarketManager.get().getPages().get(0);
+		Inventory inv = MarketManager.getManager().getPages().get(0);
 		player.openInventory(inv);
 	}
 }

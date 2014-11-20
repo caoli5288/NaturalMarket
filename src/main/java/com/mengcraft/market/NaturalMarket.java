@@ -29,7 +29,7 @@ public class NaturalMarket extends JavaPlugin {
 		Bukkit.getScheduler().runTaskTimer(get(), PriceTask.getTask(), 72000, 72000);
 		getCommand("market").setExecutor(new Commands());
 		getServer().getPluginManager().registerEvents(new Events(), this);
-		MarketManager.get().flush();
+		MarketManager.getManager().flush();
 		setupEconomy();
 	}
 

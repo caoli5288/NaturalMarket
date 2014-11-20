@@ -1,6 +1,8 @@
 package com.mengcraft.market;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +23,14 @@ import com.mengcraft.db.TableManager;
 public class MarketManager {
 	private final static MarketManager MANAGER = new MarketManager();
 	private final List<Inventory> inventories;
+	private boolean lock;
 
 	public MarketManager() {
 		this.inventories = new ArrayList<Inventory>();
+		setLock(false);
 	}
 
-	public static MarketManager get() {
+	public static MarketManager getManager() {
 		return MANAGER;
 	}
 
@@ -35,9 +39,12 @@ public class MarketManager {
 	}
 
 	public void flush() {
+		setLock(true);
+
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
 		List<MengRecord> records = table.find();
 		List<ItemStack> stacks = new ArrayList<ItemStack>();
+
 		kickViewers();
 		getPages().clear();
 		for (MengRecord record : records) {
@@ -52,11 +59,10 @@ public class MarketManager {
 			}
 		}
 		newInv(stacks);
+		setLock(false);
 	}
 
 	private void kickViewers() {
-		// TODO 刷新过程中不允许其他人打开商店
-		// TODO 卖出价格需要进行浮点数限制
 		for (Inventory inventory : getPages()) {
 			List<HumanEntity> entities = new ArrayList<HumanEntity>(inventory.getViewers());
 			for (HumanEntity entity : entities) {
@@ -106,8 +112,9 @@ public class MarketManager {
 			ItemStack stack = StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
 			ItemMeta meta = stack.getItemMeta();
 			List<String> lore = meta.getLore() != null ? meta.getLore() : new ArrayList<String>();
-			lore.add(0, "卖出价格: " + record.getDouble("price") * 0.8); // 2
-			lore.add(0, "买入价格: " + record.getDouble("price")); // 1
+			double price = record.getDouble("price");
+			lore.add(0, "卖出价格: " + new BigDecimal(price * 0.8).setScale(2, RoundingMode.UP).doubleValue()); // 2
+			lore.add(0, "买入价格: " + price); // 1
 			lore.add(0, "商品编号: " + record.getInteger("id")); // 0
 			meta.setLore(lore);
 			stack.setItemMeta(meta);
@@ -116,5 +123,13 @@ public class MarketManager {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public boolean isLock() {
+		return lock;
+	}
+
+	public void setLock(boolean lock) {
+		this.lock = lock;
 	}
 }

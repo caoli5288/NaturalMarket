@@ -29,11 +29,11 @@ public class PriceTask implements Runnable {
 				price = price - price * multi;
 			}
 			record.put("sales", 0);
-			record.put("price", new BigDecimal(price).setScale(2, RoundingMode.HALF_UP));
+			record.put("price", new BigDecimal(price).setScale(2, RoundingMode.HALF_UP).doubleValue());
 			table.update(record);
 		}
 		TableManager.getManager().saveTable("NaturalMarket");
-		MarketManager.get().flush();
+		MarketManager.getManager().flush();
 	}
 
 	public static PriceTask getTask() {
