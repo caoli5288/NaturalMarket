@@ -1,7 +1,6 @@
 package com.mengcraft.market;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Random;
 
@@ -21,15 +20,15 @@ public class PriceTask implements Runnable {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
 		List<MengRecord> list = table.find("price");
 		for (MengRecord record : list) {
-			double price = record.getDouble("price");
-			double multi = new Random().nextInt(1024) / 10240d;
+			BigDecimal price = new BigDecimal(record.getString("price"));
+			BigDecimal multi = new BigDecimal(new Random().nextInt(1024)).divide(new BigDecimal("10240"));
 			if (record.getInteger("sales") > 0) {
-				price = price + price * multi;
+				price = price.add(price.multiply(multi));
 			} else {
-				price = price - price * multi;
+				price = price.subtract(price.multiply(multi));
 			}
 			record.put("sales", 0);
-			record.put("price", new BigDecimal(price).setScale(2, RoundingMode.HALF_UP).doubleValue());
+			record.put("price", price.doubleValue());
 			table.update(record);
 		}
 		TableManager.getManager().saveTable("NaturalMarket");

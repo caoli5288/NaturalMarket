@@ -31,6 +31,8 @@ public class NaturalMarket extends JavaPlugin {
 		getServer().getPluginManager().registerEvents(new Events(), this);
 		MarketManager.getManager().flush();
 		setupEconomy();
+		getLogger().info("梦梦家高性能服务器出租");
+		getLogger().info("淘宝店 http://shop105595113.taobao.com");
 	}
 
 	public static NaturalMarket get() {

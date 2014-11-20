@@ -112,9 +112,9 @@ public class MarketManager {
 			ItemStack stack = StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
 			ItemMeta meta = stack.getItemMeta();
 			List<String> lore = meta.getLore() != null ? meta.getLore() : new ArrayList<String>();
-			double price = record.getDouble("price");
-			lore.add(0, "卖出价格: " + new BigDecimal(price * 0.8).setScale(2, RoundingMode.UP).doubleValue()); // 2
-			lore.add(0, "买入价格: " + price); // 1
+			String price = record.getString("price");
+			lore.add(0, "卖出价格: " + new BigDecimal(price).multiply(new BigDecimal("0.8")).setScale(2, RoundingMode.UP)); // 2
+			lore.add(0, "买入价格: " + new BigDecimal(price).setScale(2, RoundingMode.UP)); // 1
 			lore.add(0, "商品编号: " + record.getInteger("id")); // 0
 			meta.setLore(lore);
 			stack.setItemMeta(meta);
