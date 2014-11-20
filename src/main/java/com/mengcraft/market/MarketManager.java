@@ -38,7 +38,7 @@ public class MarketManager {
 
 	public ItemStack getStack(int i) {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-		MengRecord record = table.find("id", i).get(0);
+		MengRecord record = table.findOne("id", i);
 		try {
 			return StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
 		} catch (IOException e) {
@@ -49,7 +49,7 @@ public class MarketManager {
 
 	public void setStackLog(int id, boolean isBuy) {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-		MengRecord record = table.find("id", id).get(0);
+		MengRecord record = table.findOne("id", id);
 		if (isBuy) {
 			record.put("sales", record.getInteger("sales") + 1);
 		} else {
@@ -85,15 +85,15 @@ public class MarketManager {
 
 	public boolean downStack(int id) {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
-		List<MengRecord> one = table.find("id", id);
-		if (one.isEmpty()) {
-			return false;
-		} else {
+		MengRecord one = table.findOne("id", id);
+		if (one != null) {
 			table.delete(one);
 			MarketManager.getManager().flushPage();
 			TableManager.getManager().saveTable("NaturalMarket");
 			return true;
+
 		}
+		return false;
 	}
 
 	public void flushPage() {
