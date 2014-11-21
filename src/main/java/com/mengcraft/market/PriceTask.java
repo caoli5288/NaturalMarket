@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 
+import org.bukkit.Bukkit;
+
 import com.mengcraft.db.MengRecord;
 import com.mengcraft.db.MengTable;
 import com.mengcraft.db.TableManager;
@@ -17,6 +19,9 @@ public class PriceTask implements Runnable {
 
 	@Override
 	public void run() {
+		if (Bukkit.getOnlinePlayers().length < 1) {
+			return;
+		}
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
 		List<MengRecord> list = table.find("price");
 		for (MengRecord record : list) {

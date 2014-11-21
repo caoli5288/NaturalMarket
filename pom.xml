@@ -5,7 +5,7 @@
 	<artifactId>naturalmarket</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<name>NaturalMarket</name>
-	
+
 	<repositories>
 		<repository>
 			<id>repo.comphenix.net </id>
@@ -16,7 +16,7 @@
 			<url>http://repo.md-5.net/content/groups/public/</url>
 		</repository>
 	</repositories>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>net.milkbowl.vault</groupId>
@@ -39,8 +39,18 @@
 			<version>3.4.0</version>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
