@@ -38,12 +38,22 @@ public class Events implements Listener {
 					buy(event.getWhoClicked().getName(), event.getCurrentItem());
 				} else if (event.getClick().equals(ClickType.RIGHT)) {
 					sell(event.getWhoClicked().getName(), event.getCurrentItem());
+				} else if (event.getClick().equals(ClickType.SHIFT_LEFT)) {
+					down(event.getWhoClicked().getName(), event.getCurrentItem());
 				}
 			} else if (event.getSlot() == 51) {
 				showNextPage(event.getWhoClicked(), event.getClickedInventory(), false);
 			} else if (event.getSlot() == 53) {
 				showNextPage(event.getWhoClicked(), event.getClickedInventory(), true);
 			}
+		}
+	}
+
+	private void down(String name, ItemStack stack) {
+		// TODO Auto-generated method stub
+		if (Bukkit.getPlayerExact(name).hasPermission("market.admin")) {
+			int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
+			MarketManager.getManager().downStack(id);
 		}
 	}
 
