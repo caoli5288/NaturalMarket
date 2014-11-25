@@ -20,9 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class Events implements Listener {
 	@EventHandler
 	public void onMarket(InventoryClickEvent event) {
-		if (event.getClickedInventory() != null && event.getView().getTitle().startsWith("NaturalMarket")) {
-			// System.out.println("Events.OnMarket.Hitting");
-			// System.out.println("Events.OnMarket.Slot." + event.getSlot());
+		if (event.getClickedInventory() != null && event.getView().getTitle().startsWith("NaturalMarket") && event.getCurrentItem().getType() != Material.AIR) {
 			event.setCancelled(true);
 			Bukkit.getScheduler().runTaskLater(NaturalMarket.get(), new FlushInventory(event.getWhoClicked().getName()), 1);
 			if (event.getClickedInventory().getTitle().startsWith("NaturalMarket")) {
@@ -32,20 +30,18 @@ public class Events implements Listener {
 	}
 
 	private void clickAct(InventoryClickEvent event) {
-		if (event.getCurrentItem().getType() != Material.AIR) {
-			if (event.getSlot() < 40) {
-				if (event.getClick().equals(ClickType.LEFT)) {
-					buy(event.getWhoClicked().getName(), event.getCurrentItem());
-				} else if (event.getClick().equals(ClickType.RIGHT)) {
-					sell(event.getWhoClicked().getName(), event.getCurrentItem());
-				} else if (event.getClick().equals(ClickType.SHIFT_LEFT)) {
-					down(event.getWhoClicked().getName(), event.getCurrentItem());
-				}
-			} else if (event.getSlot() == 51) {
-				showNextPage(event.getWhoClicked(), event.getClickedInventory(), false);
-			} else if (event.getSlot() == 53) {
-				showNextPage(event.getWhoClicked(), event.getClickedInventory(), true);
+		if (event.getSlot() < 40) {
+			if (event.getClick().equals(ClickType.LEFT)) {
+				buy(event.getWhoClicked().getName(), event.getCurrentItem());
+			} else if (event.getClick().equals(ClickType.RIGHT)) {
+				sell(event.getWhoClicked().getName(), event.getCurrentItem());
+			} else if (event.getClick().equals(ClickType.SHIFT_LEFT)) {
+				down(event.getWhoClicked().getName(), event.getCurrentItem());
 			}
+		} else if (event.getSlot() == 51) {
+			showNextPage(event.getWhoClicked(), event.getClickedInventory(), false);
+		} else if (event.getSlot() == 53) {
+			showNextPage(event.getWhoClicked(), event.getClickedInventory(), true);
 		}
 	}
 
