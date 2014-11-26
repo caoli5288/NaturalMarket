@@ -49,6 +49,7 @@ public class Events implements Listener {
 		// TODO Auto-generated method stub
 		if (Bukkit.getPlayerExact(name).hasPermission("market.admin")) {
 			int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
+			Bukkit.getPlayerExact(name).getInventory().addItem(MarketManager.getManager().getStack(id));
 			MarketManager.getManager().downStack(id);
 		}
 	}
