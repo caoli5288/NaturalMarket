@@ -46,7 +46,6 @@ public class Events implements Listener {
 	}
 
 	private void down(String name, ItemStack stack) {
-		// TODO Auto-generated method stub
 		if (Bukkit.getPlayerExact(name).hasPermission("market.admin")) {
 			int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
 			Bukkit.getPlayerExact(name).getInventory().addItem(MarketManager.getManager().getStack(id));
@@ -101,12 +100,8 @@ public class Events implements Listener {
 		if (stack != null && item.getType().equals(stack.getType())) {
 			ItemMeta itemMeta = item.getItemMeta();
 			ItemMeta stackMeta = stack.getItemMeta();
-			if (itemMeta == null && stackMeta == null) {
+			if (itemMeta.toString().equals(stackMeta.toString())) {
 				return true;
-			} else if (itemMeta != null && stackMeta != null) {
-				if (itemMeta.toString().equals(stackMeta.toString())) {
-					return true;
-				}
 			}
 		}
 		return false;
