@@ -104,6 +104,9 @@ public class MarketManager {
 		List<ItemStack[]> stacks = new ArrayList<ItemStack[]>();
 		for (MengRecord record : records) {
 			ItemStack stack = genListedStack(record);
+			if (stack == null) {
+				continue;
+			}
 			if (list.size() < 40) {
 				list.add(stack);
 			} else {
