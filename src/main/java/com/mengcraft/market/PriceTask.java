@@ -26,10 +26,10 @@ public class PriceTask implements Runnable {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
 		List<MengRecord> list = table.find("price");
 		int count = 0;
-		int sum = 1;
+		int sum = 0;
 		for (MengRecord record : list) {
 			count = count + 1;
-			sum = sum + Math.abs(record.getInteger("sales"));
+			sum = sum + 1 + Math.abs(record.getInteger("sales"));
 		}
 		BigDecimal average = new BigDecimal(sum).divide(new BigDecimal(count));
 		for (MengRecord record : list) {
