@@ -31,7 +31,7 @@ public class PriceTask implements Runnable {
 			count = count + 1;
 			sum = sum + 1 + Math.abs(record.getInteger("sales"));
 		}
-		BigDecimal average = new BigDecimal(sum).divide(new BigDecimal(count));
+		BigDecimal average = new BigDecimal(sum).divide(new BigDecimal(count), 2, RoundingMode.UP);
 		for (MengRecord record : list) {
 			BigDecimal adjust = new BigDecimal(record.getInteger("sales")).abs().divide(average, 2, RoundingMode.UP);
 			if (adjust.compareTo(new BigDecimal(2)) > 0) {
