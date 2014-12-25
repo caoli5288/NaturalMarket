@@ -1,6 +1,5 @@
 package com.mengcraft.market;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.comphenix.protocol.utility.StreamSerializer;
+import com.mengcraft.bukkit.reflect.util.StackUtil;
 import com.mengcraft.db.MengBuilder;
 import com.mengcraft.db.MengRecord;
 import com.mengcraft.db.MengTable;
@@ -39,12 +38,7 @@ public class MarketManager {
 	public ItemStack getStack(int i) {
 		MengTable table = TableManager.getManager().getTable("NaturalMarket");
 		MengRecord record = table.findOne("id", i);
-		try {
-			return StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return new StackUtil().getItemStack(record.getString("items"));
 	}
 
 	public void setStackLog(int id, boolean isBuy) {
@@ -59,28 +53,24 @@ public class MarketManager {
 	}
 
 	public void listStack(ItemStack stack, double price) {
-		try {
-			MengTable table = TableManager.getManager().getTable("NaturalMarket");
-			MengRecord max = table.findOne("type", "max");
-			if (max == null) {
-				max = new MengBuilder().getEmptyRecord();
-				max.put("type", "max");
-				max.put("max", 0);
-			}
-			int id = max.getInteger("max");
-			MengRecord record = new MengBuilder().getEmptyRecord();
-			String items = StreamSerializer.getDefault().serializeItemStack(stack);
-			record.put("price", price);
-			record.put("id", id);
-			record.put("items", items);
-			max.put("max", id + 1);
-			table.insert(record);
-			table.update(max);
-			TableManager.getManager().saveTable("NaturalMarket");
-			MarketManager.getManager().flushPage();
-		} catch (IOException e) {
-			e.printStackTrace();
+		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengRecord max = table.findOne("type", "max");
+		if (max == null) {
+			max = new MengBuilder().getEmptyRecord();
+			max.put("type", "max");
+			max.put("max", 0);
 		}
+		int id = max.getInteger("max");
+		MengRecord record = new MengBuilder().getEmptyRecord();
+		String items = new StackUtil().getString(stack);
+		record.put("price", price);
+		record.put("id", id);
+		record.put("items", items);
+		max.put("max", id + 1);
+		table.insert(record);
+		table.update(max);
+		TableManager.getManager().saveTable("NaturalMarket");
+		MarketManager.getManager().flushPage();
 	}
 
 	public boolean downStack(int id) {
@@ -155,20 +145,15 @@ public class MarketManager {
 	}
 
 	private ItemStack genListedStack(MengRecord record) {
-		try {
-			ItemStack stack = StreamSerializer.getDefault().deserializeItemStack(record.getString("items"));
-			ItemMeta meta = stack.getItemMeta();
-			List<String> lore = meta.getLore() != null ? meta.getLore() : new ArrayList<String>();
-			String price = record.getString("price");
-			lore.add(0, "卖出价格: " + new BigDecimal(price).multiply(new BigDecimal("0.8")).setScale(2, RoundingMode.UP)); // 2
-			lore.add(0, "买入价格:" + ChatColor.GOLD + " " + new BigDecimal(price).setScale(2, RoundingMode.UP)); // 1
-			lore.add(0, "商品编号: " + record.getInteger("id")); // 0
-			meta.setLore(lore);
-			stack.setItemMeta(meta);
-			return stack;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
+		ItemStack stack = new StackUtil().getItemStack(record.getString("items"));
+		ItemMeta meta = stack.getItemMeta();
+		List<String> lore = meta.getLore() != null ? meta.getLore() : new ArrayList<String>();
+		String price = record.getString("price");
+		lore.add(0, "卖出价格: " + new BigDecimal(price).multiply(new BigDecimal("0.8")).setScale(2, RoundingMode.UP)); // 2
+		lore.add(0, "买入价格:" + ChatColor.GOLD + " " + new BigDecimal(price).setScale(2, RoundingMode.UP)); // 1
+		lore.add(0, "商品编号: " + record.getInteger("id")); // 0
+		meta.setLore(lore);
+		stack.setItemMeta(meta);
+		return stack;
 	}
 }

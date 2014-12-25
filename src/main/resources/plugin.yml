@@ -15,4 +15,4 @@ permissions:
     description: Administrator permission for this plugin.
     default: op
 
-depend: [Vault, MengDB, ProtocolLib]
+depend: [Vault, MengDB]
