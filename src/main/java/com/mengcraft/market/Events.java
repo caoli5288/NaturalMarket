@@ -20,12 +20,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class Events implements Listener {
 	@EventHandler
 	public void onMarket(InventoryClickEvent event) {
-		if (event.getClickedInventory() != null && event.getView().getTitle().startsWith("NaturalMarket") && event.getCurrentItem().getType() != Material.AIR) {
-			event.setCancelled(true);
-			Bukkit.getScheduler().runTaskLater(NaturalMarket.get(), new FlushInventory(event.getWhoClicked().getName()), 1);
-			if (event.getClickedInventory().getTitle().startsWith("NaturalMarket")) {
-				clickAct(event);
+		if (event.getView().getTitle().startsWith("NaturalMarket") && event.getCurrentItem() != null) {
+			if (event.getCurrentItem().getType() != Material.AIR) {
+				event.setCancelled(true);
+				Bukkit.getScheduler().runTaskLater(NaturalMarket.get(), new FlushInventory(event.getWhoClicked().getName()), 1);
 			}
+			if (event.getRawSlot() < 54) clickAct(event);
 		}
 	}
 
@@ -38,10 +38,10 @@ public class Events implements Listener {
 			} else if (event.getClick().equals(ClickType.SHIFT_LEFT)) {
 				down(event.getWhoClicked().getName(), event.getCurrentItem());
 			}
-		} else if (event.getSlot() == 51) {
-			showNextPage(event.getWhoClicked(), event.getClickedInventory(), false);
-		} else if (event.getSlot() == 53) {
-			showNextPage(event.getWhoClicked(), event.getClickedInventory(), true);
+		} else if (event.getRawSlot() == 51) {
+			showNextPage(event.getWhoClicked(), event.getInventory(), false);
+		} else if (event.getRawSlot() == 53) {
+			showNextPage(event.getWhoClicked(), event.getInventory(), true);
 		}
 	}
 
@@ -100,9 +100,7 @@ public class Events implements Listener {
 		if (stack != null && item.getType().equals(stack.getType())) {
 			ItemMeta itemMeta = item.getItemMeta();
 			ItemMeta stackMeta = stack.getItemMeta();
-			if (itemMeta.toString().equals(stackMeta.toString())) {
-				return true;
-			}
+			if (itemMeta.toString().equals(stackMeta.toString())) { return true; }
 		}
 		return false;
 	}
