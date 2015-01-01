@@ -15,9 +15,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.mengcraft.bukkit.reflect.util.StackUtil;
 import com.mengcraft.db.MengBuilder;
+import com.mengcraft.db.MengDB;
+import com.mengcraft.db.MengManager;
 import com.mengcraft.db.MengRecord;
 import com.mengcraft.db.MengTable;
-import com.mengcraft.db.TableManager;
 
 public class MarketManager {
 	private final static MarketManager MANAGER = new MarketManager();
@@ -36,13 +37,13 @@ public class MarketManager {
 	}
 
 	public ItemStack getStack(int i) {
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengTable table = MengDB.getManager().getTable("NaturalMarket");
 		MengRecord record = table.findOne("id", i);
 		return new StackUtil().getItemStack(record.getString("items"));
 	}
 
 	public void setStackLog(int id, boolean isBuy) {
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengTable table = MengDB.getManager().getTable("NaturalMarket");
 		MengRecord record = table.findOne("id", id);
 		if (isBuy) {
 			record.put("sales", record.getInteger("sales") + 1);
@@ -53,7 +54,7 @@ public class MarketManager {
 	}
 
 	public void listStack(ItemStack stack, double price) {
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengTable table = MengDB.getManager().getTable("NaturalMarket");
 		MengRecord max = table.findOne("type", "max");
 		if (max == null) {
 			max = new MengBuilder().getEmptyRecord();
@@ -69,17 +70,17 @@ public class MarketManager {
 		max.put("max", id + 1);
 		table.insert(record);
 		table.update(max);
-		TableManager.getManager().saveTable("NaturalMarket");
+		MengDB.getManager().saveTable("NaturalMarket");
 		MarketManager.getManager().flushPage();
 	}
 
 	public boolean downStack(int id) {
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		MengTable table = MengDB.getManager().getTable("NaturalMarket");
 		MengRecord one = table.findOne("id", id);
 		if (one != null) {
 			table.delete(one);
 			MarketManager.getManager().flushPage();
-			TableManager.getManager().saveTable("NaturalMarket");
+			MengDB.getManager().saveTable("NaturalMarket");
 			return true;
 
 		}
@@ -87,7 +88,7 @@ public class MarketManager {
 	}
 
 	public void flushPage() {
-		TableManager manager = TableManager.getManager();
+		MengManager manager = MengDB.getManager();
 		MengTable table = manager.getTable("NaturalMarket");
 		List<MengRecord> records = table.find("items");
 		List<ItemStack> list = new ArrayList<ItemStack>();

@@ -7,9 +7,9 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 
+import com.mengcraft.db.MengDB;
 import com.mengcraft.db.MengRecord;
 import com.mengcraft.db.MengTable;
-import com.mengcraft.db.TableManager;
 
 public class PriceTask implements Runnable {
 
@@ -20,10 +20,8 @@ public class PriceTask implements Runnable {
 
 	@Override
 	public void run() {
-		if (Bukkit.getOnlinePlayers().length < 1) {
-			return;
-		}
-		MengTable table = TableManager.getManager().getTable("NaturalMarket");
+		if (Bukkit.getOnlinePlayers().length < 1) { return; }
+		MengTable table = MengDB.getManager().getTable("NaturalMarket");
 		List<MengRecord> list = table.find("price");
 		int count = 0;
 		int sum = 0;
@@ -54,7 +52,7 @@ public class PriceTask implements Runnable {
 			record.put("price", price.doubleValue());
 			table.update(record);
 		}
-		TableManager.getManager().saveTable("NaturalMarket");
+		MengDB.getManager().saveTable("NaturalMarket");
 		MarketManager.getManager().flushPage();
 	}
 
