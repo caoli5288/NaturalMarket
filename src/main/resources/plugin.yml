@@ -1,6 +1,6 @@
 name: ${project.name}
 version: ${project.version}
-main: com.mengcraft.market.NaturalMarket
+main: ${project.groupId}.${project.artifactId}.${project.name}
 
 commands:
   market:
@@ -15,4 +15,4 @@ permissions:
     description: Administrator permission for this plugin.
     default: op
 
-depend: [Vault, MengDB]
+depend: [Vault, MengDB, ProtocolLib]

@@ -13,7 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.mengcraft.bukkit.reflect.util.StackUtil;
+import com.comphenix.protocol.utility.StreamSerializer;
 import com.mengcraft.db.MengBuilder;
 import com.mengcraft.db.MengDB;
 import com.mengcraft.db.MengManager;
@@ -39,7 +39,15 @@ public class MarketManager {
 	public ItemStack getStack(int i) {
 		MengTable table = MengDB.getManager().getTable("NaturalMarket");
 		MengRecord record = table.findOne("id", i);
-		return new StackUtil().getItemStack(record.getString("items"));
+		ItemStack stack = null;
+		try {
+			StreamSerializer serializer = StreamSerializer.getDefault();
+			stack = serializer.deserializeItemStack(record.getString("items"));
+		} catch (Exception e) {
+			stack = new ItemStack(Material.AIR);
+			throw new RuntimeException("Unknown item data!");
+		}
+		return stack;
 	}
 
 	public void setStackLog(int id, boolean isBuy) {
@@ -63,7 +71,13 @@ public class MarketManager {
 		}
 		int id = max.getInteger("max");
 		MengRecord record = new MengBuilder().getEmptyRecord();
-		String items = new StackUtil().getString(stack);
+		String items = null;
+		try {
+			StreamSerializer serializer = StreamSerializer.getDefault();
+			items = serializer.serializeItemStack(stack);
+		} catch (Exception e) {
+			throw new RuntimeException("Unknown item data!");
+		}
 		record.put("price", price);
 		record.put("id", id);
 		record.put("items", items);
@@ -146,7 +160,14 @@ public class MarketManager {
 	}
 
 	private ItemStack genListedStack(MengRecord record) {
-		ItemStack stack = new StackUtil().getItemStack(record.getString("items"));
+		ItemStack stack = null;
+		try {
+			StreamSerializer serializer = StreamSerializer.getDefault();
+			stack = serializer.deserializeItemStack(record.getString("items"));
+		} catch (Exception e) {
+			stack = new ItemStack(Material.AIR);
+			throw new RuntimeException("Unknown item data!");
+		}
 		ItemMeta meta = stack.getItemMeta();
 		List<String> lore = meta.getLore() != null ? meta.getLore() : new ArrayList<String>();
 		String price = record.getString("price");
