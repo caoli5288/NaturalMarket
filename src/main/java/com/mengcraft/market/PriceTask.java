@@ -20,9 +20,16 @@ public class PriceTask implements Runnable {
 
 	@Override
 	public void run() {
-		if (Bukkit.getOnlinePlayers().length < 1) { return; }
+		if (Bukkit.getOnlinePlayers().length < 1) {
+			// return if no one online
+			return;
+		}
 		MengTable table = MengDB.getManager().getTable("NaturalMarket");
 		List<MengRecord> list = table.find("price");
+		if (list.size() < 1) {
+			// return if not exists
+			return;
+		}
 		int count = 0;
 		int sum = 0;
 		for (MengRecord record : list) {
