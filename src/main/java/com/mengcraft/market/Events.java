@@ -72,9 +72,26 @@ public class Events implements Listener {
 		} else {
 			sendInfo(name, 1);
 			pickStack(inventory, map, item.getAmount());
-			double price = new Double(stack.getItemMeta().getLore().get(1).split(" ")[1]);
+			double price = new Double(stack.getItemMeta().getLore().get(2).split(" ")[1]);
 			NaturalMarket.getEconomy().depositPlayer(name, price);
 			MarketManager.getManager().setStackLog(id, false);
+		}
+	}
+
+	private void buy(String name, ItemStack stack) {
+		double price = new Double(stack.getItemMeta().getLore().get(1).split(" ")[1]);
+		int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
+		// System.out.println("Events.Buy.Buyer." + name);
+		if (NaturalMarket.getEconomy().has(name, price)) {
+			NaturalMarket.getEconomy().withdrawPlayer(name, price);
+			Player player = Bukkit.getPlayerExact(name);
+			ItemStack item = MarketManager.getManager().getStack(id);
+			if (player.getInventory().addItem(item).size() > 0) {
+				player.getWorld().dropItem(player.getLocation(), item);
+			}
+			MarketManager.getManager().setStackLog(id, true);
+		} else {
+			NaturalMarket.get().getServer().getPlayerExact(name).sendMessage(ChatColor.RED + "账户余额不足");
 		}
 	}
 
@@ -103,23 +120,6 @@ public class Events implements Listener {
 			if (itemMeta.toString().equals(stackMeta.toString())) { return true; }
 		}
 		return false;
-	}
-
-	private void buy(String name, ItemStack stack) {
-		double price = new Double(stack.getItemMeta().getLore().get(1).split(" ")[1]);
-		int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
-		// System.out.println("Events.Buy.Buyer." + name);
-		if (NaturalMarket.getEconomy().has(name, price)) {
-			NaturalMarket.getEconomy().withdrawPlayer(name, price);
-			Player player = Bukkit.getPlayerExact(name);
-			ItemStack item = MarketManager.getManager().getStack(id);
-			if (player.getInventory().addItem(item).size() > 0) {
-				player.getWorld().dropItem(player.getLocation(), item);
-			}
-			MarketManager.getManager().setStackLog(id, true);
-		} else {
-			NaturalMarket.get().getServer().getPlayerExact(name).sendMessage(ChatColor.RED + "账户余额不足");
-		}
 	}
 
 	private void showNextPage(HumanEntity who, Inventory inventory, boolean isNext) {
