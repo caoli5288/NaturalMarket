@@ -24,8 +24,10 @@ public class Events implements Listener {
 			if (event.getCurrentItem().getType() != Material.AIR) {
 				event.setCancelled(true);
 				Bukkit.getScheduler().runTaskLater(NaturalMarket.get(), new FlushInventory(event.getWhoClicked().getName()), 1);
+				if (event.getRawSlot() < 54) {
+					clickAct(event);
+				}
 			}
-			if (event.getRawSlot() < 54) clickAct(event);
 		}
 	}
 
@@ -117,7 +119,9 @@ public class Events implements Listener {
 		if (stack != null && item.getType().equals(stack.getType())) {
 			ItemMeta itemMeta = item.getItemMeta();
 			ItemMeta stackMeta = stack.getItemMeta();
-			if (itemMeta.toString().equals(stackMeta.toString())) { return true; }
+			if (itemMeta.toString().equals(stackMeta.toString())) {
+				return true;
+			}
 		}
 		return false;
 	}
