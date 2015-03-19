@@ -115,12 +115,12 @@ public class Events implements Listener {
 		}
 	}
 
-	private boolean compareStack(ItemStack item, ItemStack stack) {
-		if (stack != null && item.getType().equals(stack.getType())) {
-			ItemMeta itemMeta = item.getItemMeta();
-			ItemMeta stackMeta = stack.getItemMeta();
-			if (itemMeta.toString().equals(stackMeta.toString())) {
-				return true;
+	private boolean compareStack(ItemStack one, ItemStack oth) {
+		if (oth != null && one.getType() == oth.getType()) {
+			ItemMeta oneMeta = one.getItemMeta();
+			ItemMeta othMeta = oth.getItemMeta();
+			if (oneMeta.toString().equals(othMeta.toString())) {
+				return one.getDurability() == oth.getDurability();
 			}
 		}
 		return false;
