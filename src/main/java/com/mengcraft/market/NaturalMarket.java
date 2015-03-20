@@ -24,7 +24,8 @@ public class NaturalMarket extends JavaPlugin {
 		} catch (IOException e) {
 			getLogger().warning("Can not link to mcstats.org!");
 		}
-		getServer().getScheduler().runTaskTimer(this, PRICE_TASK, 36000, 36000);
+		int tick = getConfig().getInt("price-reset-tick", 36000);
+		getServer().getScheduler().runTaskTimer(this, PRICE_TASK, tick, tick);
 		getCommand("market").setExecutor(new Commands());
 		getServer().getPluginManager().registerEvents(new Events(this), this);
 		MARKET_MANAGER.flushPage();
