@@ -21,16 +21,8 @@ import com.mengcraft.db.MengRecord;
 import com.mengcraft.db.MengTable;
 
 public class MarketManager {
-	private final static MarketManager MANAGER = new MarketManager();
-	private final List<Inventory> pages;
-
-	private MarketManager() {
-		this.pages = new ArrayList<Inventory>();
-	}
-
-	public static MarketManager getManager() {
-		return MANAGER;
-	}
+	
+	private final List<Inventory> pages = new ArrayList<>();
 
 	public List<Inventory> getPages() {
 		return pages;
@@ -85,7 +77,7 @@ public class MarketManager {
 		table.insert(record);
 		table.update(max);
 		MengDB.getManager().saveTable("NaturalMarket");
-		MarketManager.getManager().flushPage();
+		this.flushPage();
 	}
 
 	public boolean downStack(int id) {
@@ -93,7 +85,7 @@ public class MarketManager {
 		MengRecord one = table.findOne("id", id);
 		if (one != null) {
 			table.delete(one);
-			MarketManager.getManager().flushPage();
+			this.flushPage();
 			MengDB.getManager().saveTable("NaturalMarket");
 			return true;
 

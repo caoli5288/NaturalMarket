@@ -13,11 +13,6 @@ import com.mengcraft.db.MengTable;
 
 public class PriceTask implements Runnable {
 
-	private final static PriceTask TASK = new PriceTask();
-
-	private PriceTask() {
-	}
-
 	@Override
 	public void run() {
 		if (Bukkit.getOnlinePlayers().length < 1) {
@@ -60,10 +55,7 @@ public class PriceTask implements Runnable {
 			table.update(record);
 		}
 		MengDB.getManager().saveTable("NaturalMarket");
-		MarketManager.getManager().flushPage();
+		NaturalMarket.MARKET_MANAGER.flushPage();
 	}
-
-	public static PriceTask getTask() {
-		return TASK;
-	}
+	
 }

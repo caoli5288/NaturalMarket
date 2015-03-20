@@ -4,42 +4,33 @@ import java.io.IOException;
 
 import net.milkbowl.vault.economy.Economy;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.mcstats.Metrics;
 
 public class NaturalMarket extends JavaPlugin {
-	private static NaturalMarket market;
+
+	public final static PriceTask PRICE_TASK = new PriceTask();
+	public final static MarketManager MARKET_MANAGER = new MarketManager();
+
 	private static Economy economy;
 
 	@Override
-	public void onLoad() {
-		setMarket(this);
-	}
-
-	@Override
 	public void onEnable() {
+		saveDefaultConfig();
+		saveConfig();
 		try {
 			new Metrics(this).start();
 		} catch (IOException e) {
 			getLogger().warning("Can not link to mcstats.org!");
 		}
-		Bukkit.getScheduler().runTaskTimer(get(), PriceTask.getTask(), 36000, 36000);
+		getServer().getScheduler().runTaskTimer(this, PRICE_TASK, 36000, 36000);
 		getCommand("market").setExecutor(new Commands());
-		getServer().getPluginManager().registerEvents(new Events(), this);
-		MarketManager.getManager().flushPage();
+		getServer().getPluginManager().registerEvents(new Events(this), this);
+		MARKET_MANAGER.flushPage();
 		setupEconomy();
 		getLogger().info("梦梦家高性能服务器出租");
 		getLogger().info("http://shop105595113.taobao.com");
-	}
-
-	public static NaturalMarket get() {
-		return market;
-	}
-
-	private static void setMarket(NaturalMarket market) {
-		NaturalMarket.market = market;
 	}
 
 	private boolean setupEconomy() {

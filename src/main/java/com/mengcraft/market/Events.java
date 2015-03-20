@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,14 +17,24 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
 public class Events implements Listener {
+
+	private final Server server;
+	private final Plugin plugin;
+	
+	public Events(Plugin plugin) {
+		this.plugin = plugin;
+		this.server = plugin.getServer();
+	}
+
 	@EventHandler
 	public void onMarket(InventoryClickEvent event) {
 		if (event.getView().getTitle().startsWith("NaturalMarket") && event.getCurrentItem() != null) {
 			if (event.getCurrentItem().getType() != Material.AIR) {
 				event.setCancelled(true);
-				Bukkit.getScheduler().runTaskLater(NaturalMarket.get(), new FlushInventory(event.getWhoClicked().getName()), 1);
+				this.server.getScheduler().runTaskLater(this.plugin, new FlushInventory(event.getWhoClicked().getName()), 1);
 				if (event.getRawSlot() < 54) {
 					clickAct(event);
 				}
@@ -50,15 +61,15 @@ public class Events implements Listener {
 	private void down(String name, ItemStack stack) {
 		if (Bukkit.getPlayerExact(name).hasPermission("market.admin")) {
 			int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
-			Bukkit.getPlayerExact(name).getInventory().addItem(MarketManager.getManager().getStack(id));
-			MarketManager.getManager().downStack(id);
+			Bukkit.getPlayerExact(name).getInventory().addItem(NaturalMarket.MARKET_MANAGER.getStack(id));
+			NaturalMarket.MARKET_MANAGER.downStack(id);
 		}
 	}
 
 	private void sell(String name, ItemStack stack) {
 		int id = new Integer(stack.getItemMeta().getLore().get(0).split(" ")[1]);
 		// This object "item" is prototype item stack
-		ItemStack item = MarketManager.getManager().getStack(id);
+		ItemStack item = NaturalMarket.MARKET_MANAGER.getStack(id);
 		Inventory inventory = Bukkit.getPlayerExact(name).getInventory();
 		Map<Integer, ItemStack> map = new HashMap<Integer, ItemStack>();
 		int amount = 0;
@@ -76,7 +87,7 @@ public class Events implements Listener {
 			pickStack(inventory, map, item.getAmount());
 			double price = new Double(stack.getItemMeta().getLore().get(2).split(" ")[1]);
 			NaturalMarket.getEconomy().depositPlayer(name, price);
-			MarketManager.getManager().setStackLog(id, false);
+			NaturalMarket.MARKET_MANAGER.setStackLog(id, false);
 		}
 	}
 
@@ -87,13 +98,13 @@ public class Events implements Listener {
 		if (NaturalMarket.getEconomy().has(name, price)) {
 			NaturalMarket.getEconomy().withdrawPlayer(name, price);
 			Player player = Bukkit.getPlayerExact(name);
-			ItemStack item = MarketManager.getManager().getStack(id);
+			ItemStack item = NaturalMarket.MARKET_MANAGER.getStack(id);
 			if (player.getInventory().addItem(item).size() > 0) {
 				player.getWorld().dropItem(player.getLocation(), item);
 			}
-			MarketManager.getManager().setStackLog(id, true);
+			NaturalMarket.MARKET_MANAGER.setStackLog(id, true);
 		} else {
-			NaturalMarket.get().getServer().getPlayerExact(name).sendMessage(ChatColor.RED + "账户余额不足");
+			this.server.getPlayerExact(name).sendMessage(ChatColor.RED + "账户余额不足");
 		}
 	}
 
@@ -133,7 +144,7 @@ public class Events implements Listener {
 		} else {
 			curPage = curPage - 1;
 		}
-		NaturalMarket.get().getServer().getScheduler().runTaskLater(NaturalMarket.get(), new ShowMarketPage(who.getName(), curPage), 1);
+		this.server.getScheduler().runTaskLater(this.plugin, new ShowMarketPage(who, curPage), 1);
 	}
 
 	private void sendInfo(String name, int i) {
@@ -167,25 +178,19 @@ public class Events implements Listener {
 	}
 
 	private class ShowMarketPage implements Runnable {
-		private final String name;
+
+		private final HumanEntity name;
 		private final int page;
 
-		public ShowMarketPage(String name, int page) {
+		public ShowMarketPage(HumanEntity name, int page) {
 			this.name = name;
-			this.page = page > -1 ? page < MarketManager.getManager().getPages().size() ? page : 0 : MarketManager.getManager().getPages().size() - 1;
+			this.page = page > -1 ? page < NaturalMarket.MARKET_MANAGER.getPages().size() ? page : 0 : NaturalMarket.MARKET_MANAGER.getPages().size() - 1;
 		}
 
 		@Override
 		public void run() {
-			NaturalMarket.get().getServer().getPlayerExact(getName()).openInventory(MarketManager.getManager().getPages().get(getPage()));
+			this.name.openInventory(NaturalMarket.MARKET_MANAGER.getPages().get(this.page));
 		}
 
-		private int getPage() {
-			return page;
-		}
-
-		private String getName() {
-			return name;
-		}
 	}
 }

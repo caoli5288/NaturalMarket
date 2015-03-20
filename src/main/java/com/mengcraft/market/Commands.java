@@ -23,9 +23,9 @@ public class Commands implements CommandExecutor {
 	private void adminCommand(CommandSender sender, String[] args) {
 		if (args.length < 2) {
 			if (args[0].equals("flush")) {
-				MarketManager.getManager().flushPage();
+				NaturalMarket.MARKET_MANAGER.flushPage();
 			} else if (args[0].equals("price")) {
-				PriceTask.getTask().run();
+				NaturalMarket.PRICE_TASK.run();
 			}
 		} else if (args.length < 3) {
 			if (args[0].equals("list")) {
@@ -39,7 +39,7 @@ public class Commands implements CommandExecutor {
 	private void downItem(CommandSender sender, String string) {
 		try {
 			int id = Integer.parseInt(string);
-			if (MarketManager.getManager().downStack(id)) {
+			if (NaturalMarket.MARKET_MANAGER.downStack(id)) {
 				sendInfo(sender, 1);
 			} else {
 				sendInfo(sender, 3);
@@ -58,7 +58,7 @@ public class Commands implements CommandExecutor {
 			} else {
 				sendInfo(sender, 0);
 				ItemStack stack = Bukkit.getPlayerExact(sender.getName()).getItemInHand();
-				MarketManager.getManager().listStack(stack, price);
+				NaturalMarket.MARKET_MANAGER.listStack(stack, price);
 			}
 		} catch (NumberFormatException e) {
 			sendInfo(sender, 2);
@@ -84,12 +84,11 @@ public class Commands implements CommandExecutor {
 
 	private void showMarket(CommandSender sender) {
 		if (sender instanceof Player) {
-			Player player = NaturalMarket.get().getServer().getPlayerExact(sender.getName());
-			showMarket(player);
+			showMarket((Player) sender);
 		}
 	}
 
 	private void showMarket(Player player) {
-		player.openInventory(MarketManager.getManager().getPages().get(0));
+		player.openInventory(NaturalMarket.MARKET_MANAGER.getPages().get(0));
 	}
 }
